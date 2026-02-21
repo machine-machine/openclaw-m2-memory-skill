@@ -1,18 +1,28 @@
 ---
 name: m2-memory
-description: Vector-based semantic memory using agent.memory.system (Qdrant + BGE-M3). Use for storing and retrieving memories with semantic search, importance scoring, and entity tagging. Triggers on memory operations requiring semantic understanding, long-term storage, or when markdown-based memory_search is insufficient. Complements existing memory_search/memory_get tools.
+description: Vector-based semantic memory using agent.memory.system (Qdrant + BGE-M3). Full PRD v2 system with consolidation, reinforcement scoring, ColBERT reranking, and smart query routing. Use for storing and retrieving memories with semantic search, importance scoring, and entity tagging. Complements existing memory_search/memory_get tools.
 ---
 
 # M2 Memory Skill
 
-Semantic memory system using Qdrant vector database and BGE-M3 embeddings.
+Semantic memory system using Qdrant vector database and BGE-M3 embeddings. Now includes PRD v2 modules (M1-M4).
+
+## Modules
+
+| Module | Status | What it does |
+|--------|--------|-------------|
+| **M3** ColBERT Reranking | ✅ Active | Token-level reranking on top-20 RRF candidates (+8-15% precision) |
+| **M1** Consolidation | ✅ Active | Auto-distills episodic→semantic facts every 6h via Cerebras |
+| **M2** Importance Scoring | ✅ Active | Reinforcement loop (retrieval/utilization/outcome signals) |
+| **M4** Smart Routing | ✅ Active | LOOKUP/STANDARD/DEEP/SYNTHESIS strategies with multi-hop Cerebras |
 
 ## When to Use
 
-- **Semantic search**: Find related memories even with different wording
-- **Entity lookup**: Quick retrieval by topic/person/concept
-- **Importance tracking**: Store memories with importance scores
-- **Conversation history**: Auto-ingest and search past conversations
+- **Semantic search**: Find related memories even with different wording — use `search`
+- **Complex multi-hop queries**: "How did X evolve over time?" — use `search` with `routing_strategy=deep`
+- **Entity lookup**: Quick retrieval by topic/person/concept — use `entities`
+- **Importance reinforcement**: Signal that a memory was useful — use `feedback`
+- **Knowledge distillation**: Compress episodic history into semantic facts — use `consolidate`
 
 ## Quick Start
 

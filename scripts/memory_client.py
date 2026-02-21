@@ -65,6 +65,7 @@ class MemoryClient:
         memory_id = str(uuid4())
         vector = await self._embed(content)
         
+        now = datetime.utcnow().isoformat()
         point = {
             "id": memory_id,
             "vector": {"dense": vector},
@@ -74,10 +75,26 @@ class MemoryClient:
                 "agent_id": self.agent_id,
                 "importance": importance,
                 "initial_importance": importance,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": now,
                 "entities": entities or [],
                 "session_id": session_id,
                 "metadata": metadata or {},
+                # M1 consolidation fields
+                "consolidated": False,
+                "consolidated_into": [],
+                "consolidation_batch_id": None,
+                # M2 importance tracking fields
+                "retrieval_count": 0,
+                "utilization_count": 0,
+                "outcome_count": 0,
+                "last_retrieved": None,
+                "last_utilized": None,
+                "last_boosted": None,
+                "importance_history": [importance],
+                "boost_cooldown_until": None,
+                # M3 ColBERT
+                "has_colbert": False,
+                "colbert_token_count": 0,
             }
         }
         
