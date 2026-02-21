@@ -24,9 +24,13 @@ except ImportError:
 QDRANT_URL = os.getenv("QDRANT_URL", "http://memory-qdrant:6333")
 EMBEDDINGS_URL = os.getenv("EMBEDDINGS_URL", "http://memory-embeddings:8000")
 DEFAULT_AGENT_ID = os.getenv("AGENT_ID", "m2")
-# Per-agent namespace: agent_memory_<agent_id>. Override via COLLECTION_NAME env var.
-# m2 legacy: set COLLECTION_NAME=agent_memory explicitly to preserve existing data.
-COLLECTION_NAME = os.getenv("COLLECTION_NAME", f"agent_memory_{DEFAULT_AGENT_ID}")
+# Per-agent namespace. Auto-upgrade: if Coolify still has the legacy "agent_memory"
+# default but AGENT_ID is not m2, use the correct per-agent collection.
+_raw_collection = os.getenv("COLLECTION_NAME", f"agent_memory_{DEFAULT_AGENT_ID}")
+if _raw_collection == "agent_memory" and DEFAULT_AGENT_ID != "m2":
+    COLLECTION_NAME = f"agent_memory_{DEFAULT_AGENT_ID}"
+else:
+    COLLECTION_NAME = _raw_collection
 
 
 class MemoryClient:

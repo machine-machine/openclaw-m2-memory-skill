@@ -8,10 +8,14 @@ SCRIPT_DIR="$HOME/.openclaw/skills/m2-memory/scripts"
 export QDRANT_URL="${QDRANT_URL:-http://memory-qdrant:6333}"
 export EMBEDDINGS_URL="${EMBEDDINGS_URL:-http://memory-embeddings:8000}"
 export AGENT_ID="${AGENT_ID:-m2}"
-# Each agent gets its own Qdrant collection. COLLECTION_NAME can be overridden via env.
-# Default: agent_memory_<agent_id>  (e.g. agent_memory_muhlmann, agent_memory_miauczek)
-# m2 legacy exception: set COLLECTION_NAME=agent_memory explicitly in your local env.
-export COLLECTION_NAME="${COLLECTION_NAME:-agent_memory_${AGENT_ID}}"
+# Per-agent Qdrant namespace. Default: agent_memory_<agent_id>
+# Auto-upgrade: if Coolify still has the legacy default "agent_memory" but AGENT_ID is
+# not m2, silently use the correct per-agent collection instead.
+if [ "${COLLECTION_NAME:-agent_memory}" = "agent_memory" ] && [ "${AGENT_ID}" != "m2" ]; then
+  export COLLECTION_NAME="agent_memory_${AGENT_ID}"
+else
+  export COLLECTION_NAME="${COLLECTION_NAME:-agent_memory_${AGENT_ID}}"
+fi
 
 case "$1" in
   store)
