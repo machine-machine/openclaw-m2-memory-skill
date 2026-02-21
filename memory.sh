@@ -8,7 +8,10 @@ SCRIPT_DIR="$HOME/.openclaw/skills/m2-memory/scripts"
 export QDRANT_URL="${QDRANT_URL:-http://memory-qdrant:6333}"
 export EMBEDDINGS_URL="${EMBEDDINGS_URL:-http://memory-embeddings:8000}"
 export AGENT_ID="${AGENT_ID:-m2}"
-export COLLECTION_NAME="${COLLECTION_NAME:-agent_memory}"
+# Each agent gets its own Qdrant collection. COLLECTION_NAME can be overridden via env.
+# Default: agent_memory_<agent_id>  (e.g. agent_memory_muhlmann, agent_memory_miauczek)
+# m2 legacy exception: set COLLECTION_NAME=agent_memory explicitly in your local env.
+export COLLECTION_NAME="${COLLECTION_NAME:-agent_memory_${AGENT_ID}}"
 
 case "$1" in
   store)
