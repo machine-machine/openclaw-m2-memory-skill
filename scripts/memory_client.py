@@ -23,14 +23,8 @@ except ImportError:
 # Configuration
 QDRANT_URL = os.getenv("QDRANT_URL", "http://memory-qdrant:6333")
 EMBEDDINGS_URL = os.getenv("EMBEDDINGS_URL", "http://memory-embeddings:8000")
+COLLECTION_NAME = os.getenv("COLLECTION_NAME", "agent_memory")
 DEFAULT_AGENT_ID = os.getenv("AGENT_ID", "m2")
-# Per-agent namespace. Auto-upgrade: if Coolify still has the legacy "agent_memory"
-# default but AGENT_ID is not m2, use the correct per-agent collection.
-_raw_collection = os.getenv("COLLECTION_NAME", f"agent_memory_{DEFAULT_AGENT_ID}")
-if _raw_collection == "agent_memory" and DEFAULT_AGENT_ID != "m2":
-    COLLECTION_NAME = f"agent_memory_{DEFAULT_AGENT_ID}"
-else:
-    COLLECTION_NAME = _raw_collection
 
 
 class MemoryClient:
@@ -74,7 +68,7 @@ class MemoryClient:
         now = datetime.utcnow().isoformat()
         point = {
             "id": memory_id,
-            "vector": {"dense": vector},
+            "vector": vector,
             "payload": {
                 "content": content,
                 "memory_type": memory_type,
@@ -142,7 +136,7 @@ class MemoryClient:
         async with self.session.post(
             f"{QDRANT_URL}/collections/{COLLECTION_NAME}/points/search",
             json={
-                "vector": {"name": "dense", "vector": vector},
+                "vector": vector,
                 "limit": limit,
                 "with_payload": True,
                 "filter": {"must": must_conditions}
@@ -155,10 +149,10 @@ class MemoryClient:
             {
                 "score": r["score"],
                 "content": r["payload"]["content"],
-                "memory_type": r["payload"]["memory_type"],
-                "importance": r["payload"]["importance"],
+                "memory_type": r["payload"].get("memory_type", "semantic"),
+                "importance": r["payload"].get("importance", 0.7),
                 "entities": r["payload"].get("entities", []),
-                "timestamp": r["payload"]["timestamp"],
+                "timestamp": r["payload"].get("timestamp", ""),
             }
             for r in data.get("result", [])
         ]
@@ -197,10 +191,10 @@ class MemoryClient:
         return [
             {
                 "content": r["payload"]["content"],
-                "memory_type": r["payload"]["memory_type"],
-                "importance": r["payload"]["importance"],
+                "memory_type": r["payload"].get("memory_type", "semantic"),
+                "importance": r["payload"].get("importance", 0.7),
                 "entities": r["payload"].get("entities", []),
-                "timestamp": r["payload"]["timestamp"],
+                "timestamp": r["payload"].get("timestamp", ""),
             }
             for r in data.get("result", {}).get("points", [])
         ]
@@ -235,10 +229,10 @@ class MemoryClient:
         return [
             {
                 "content": r["payload"]["content"],
-                "memory_type": r["payload"]["memory_type"],
-                "importance": r["payload"]["importance"],
+                "memory_type": r["payload"].get("memory_type", "semantic"),
+                "importance": r["payload"].get("importance", 0.7),
                 "entities": r["payload"].get("entities", []),
-                "timestamp": r["payload"]["timestamp"],
+                "timestamp": r["payload"].get("timestamp", ""),
             }
             for r in data.get("result", {}).get("points", [])
         ]
